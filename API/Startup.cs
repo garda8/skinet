@@ -20,6 +20,9 @@ namespace API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<IProductsRepository, ProductsRepository>();
+            //services.AddTransient<IProductsRepository, ProductsRepository>();  //för kort levnadstid , för bara en metod.
+            //services.AddSingleton<IProductsRepository, ProductsRepository>();  //för lång levnadstid, typ så länge appen är igång..
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -27,11 +30,8 @@ namespace API
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
             });
 
-            services.AddTransient<IProductsRepository, ProductsRepository>();
-            ///services.AddDbContext<API.Repositories>(options =>
-    //options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+           
 
-            //SetupDependencyInjection(services);
 
         }
 

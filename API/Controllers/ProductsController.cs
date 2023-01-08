@@ -22,7 +22,7 @@ namespace API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetProducts(CancellationToken cancellationToken)
         {
-            var products = await _repo.SelectAllProducts(cancellationToken);
+            var products = await _repo.GetProductsAsync(cancellationToken);
 
             return Ok(products);
         }
@@ -30,7 +30,7 @@ namespace API.Controllers
         [HttpGet ("{id}")]
         public async Task<IActionResult> GetProduct(int id, CancellationToken cancellationToken)
         {
-            var res = await _repo.SelectProduct(id, cancellationToken);
+            var res = await _repo.GetProductByIdAsync(id, cancellationToken);
 
             if (res != null) { 
                 return Ok(res);
@@ -40,10 +40,31 @@ namespace API.Controllers
                 return NotFound("Id "+ id + " was not found");
             }
         }
+
+        [HttpGet("Brands")]
+        public async Task<IActionResult> GetProductBrands(CancellationToken cancellationToken)
+        {
+            var productBrands = await _repo.GetProductBrandsAsync(cancellationToken);
+
+            return Ok(productBrands);
+        }
+
+        [HttpGet("Types")]
+        public async Task<IActionResult> GetProductTypes(CancellationToken cancellationToken)
+        {
+            var productTypes = await _repo.GetProductTypesAsync(cancellationToken);
+
+            return Ok(productTypes);
+        }
+
+
+
+
+
     }
 
 
 
 
-    
+
 }
