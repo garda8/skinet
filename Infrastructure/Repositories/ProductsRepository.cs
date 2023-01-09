@@ -17,8 +17,8 @@ namespace Infastructure.Repositories
 {
     public interface IProductsRepository
     {
-        Task<IEnumerable<Product>> GetProductsAsync(CancellationToken cancellationToken);
-        Task<Product> GetProductByIdAsync(int Id, CancellationToken cancellationToken);
+        Task<IEnumerable<ProductViewModel>> GetProductsAsync(CancellationToken cancellationToken);
+        Task<ProductViewModel> GetProductByIdAsync(int Id, CancellationToken cancellationToken);
 
         Task<IEnumerable<ProductType>> GetProductTypesAsync(CancellationToken cancellationToken);
 
@@ -41,7 +41,7 @@ namespace Infastructure.Repositories
             connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
-        public async Task<IEnumerable<Product>> GetProductsAsync(CancellationToken cancellationToken)
+        public async Task<IEnumerable<ProductViewModel>> GetProductsAsync(CancellationToken cancellationToken)
         {
             
             using (var connection = new SqlConnection(connectionString))
@@ -55,39 +55,32 @@ namespace Infastructure.Repositories
                         $" FROM [dbo].[Products] P" +
                         $" LEFT JOIN dbo.ProductBrands PB ON p.ProductBrandId = PB.Id" +
                         $"  LEFT JOIN dbo.ProductTypes PT ON P.ProductTypeId = PT.Id",
-            //,
-            //parameters: new
-            //{
-            //    FarmId = farmId,
-            //    AnimalSpecie = specie
-            //    //endDate,
-            //    //startDate
-            //},
+            
             cancellationToken: cancellationToken);
 
                 var res = await connection.QueryAsync<ProductViewModel>(cmd);
-                List<Product> products = new List<Product>();
-                foreach (var p in res)
-                {
-                    products.Add(new Product
-                    {
-                        Id = p.Id,
-                        Name = p.Name,
-                        Description = p.Description,
-                        Price = p.Price,
-                        PictureUrl = p.PictureUrl,
-                        ProductBrand = new ProductBrand { Id = p.ProductBrandId, Name = p.ProductBrand },
-                        ProductType = new ProductType { Id = p.ProductTypeId, Name = p.ProductType },
-                        ProductTypeId = p.ProductTypeId,
-                        ProductBrandId = p.ProductBrandId
-                    });
-                }
+                //List<Product> products = new List<Product>();
+                //foreach (var p in res)
+                //{
+                //    products.Add(new Product
+                //    {
+                //        Id = p.Id,
+                //        Name = p.Name,
+                //        Description = p.Description,
+                //        Price = p.Price,
+                //        PictureUrl = p.PictureUrl,
+                //        ProductBrand = new ProductBrand { Id = p.ProductBrandId, Name = p.ProductBrand },
+                //        ProductType = new ProductType { Id = p.ProductTypeId, Name = p.ProductType },
+                //        ProductTypeId = p.ProductTypeId,
+                //        ProductBrandId = p.ProductBrandId
+                //    });
+                //}
 
-                return products;
+                return res; 
             }
         }
 
-        public async Task<Product> GetProductByIdAsync(int Id, CancellationToken cancellationToken)
+        public async Task<ProductViewModel> GetProductByIdAsync(int Id, CancellationToken cancellationToken)
         {
             try 
             { 
@@ -111,19 +104,20 @@ namespace Infastructure.Repositories
                     cancellationToken: cancellationToken);
 
                     var p = await connection.QueryFirstAsync<ProductViewModel>(cmd);
-                    var product = new Product
-                        {
-                            Id = p.Id,
-                            Name = p.Name,
-                            Description = p.Description,
-                            Price = p.Price,
-                            PictureUrl = p.PictureUrl,
-                            ProductBrand = new ProductBrand { Id = p.ProductBrandId, Name = p.ProductBrand },
-                            ProductType = new ProductType { Id = p.ProductTypeId, Name = p.ProductType },
-                            ProductTypeId = p.ProductTypeId,
-                            ProductBrandId = p.ProductBrandId
-                        };
-                    return product;
+                    //var product = new Product
+                    //    {
+                    //        Id = p.Id,
+                    //        Name = p.Name,
+                    //        Description = p.Description,
+                    //        Price = p.Price,
+                    //        PictureUrl = p.PictureUrl,
+                    //        ProductBrand = new ProductBrand { Id = p.ProductBrandId, Name = p.ProductBrand },
+                    //        ProductType = new ProductType { Id = p.ProductTypeId, Name = p.ProductType },
+                    //        ProductTypeId = p.ProductTypeId,
+                    //        ProductBrandId = p.ProductBrandId
+                    //    };
+                    //return product;
+                    return p;
                 }
             }
             catch (Exception e)
