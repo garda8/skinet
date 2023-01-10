@@ -103,7 +103,7 @@ namespace Infastructure.Repositories
                     },
                     cancellationToken: cancellationToken);
 
-                    var p = await connection.QueryFirstAsync<ProductViewModel>(cmd);
+                    var p = await connection.QueryFirstOrDefaultAsync<ProductViewModel>(cmd);
                     //var product = new Product
                     //    {
                     //        Id = p.Id,

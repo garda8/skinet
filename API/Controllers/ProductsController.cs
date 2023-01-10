@@ -10,12 +10,14 @@ using API.Dtos;
 using AutoMapper;
 using Core.Entities;
 using Microsoft.Extensions.Configuration;
+using API.Errors;
+using Microsoft.AspNetCore.Http;
 
 namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ProductsController : ControllerBase
+    public class ProductsController : BaseApiController
     {
         private readonly IProductsRepository _repo;
         private IMapper _mapper;
@@ -55,33 +57,37 @@ namespace API.Controllers
         }
 
         [HttpGet ("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetProduct(int id, CancellationToken cancellationToken)
         {
             var product = await _repo.GetProductByIdAsync(id, cancellationToken);
+            
+            if (product == null)
+            {
+                return NotFound(new ApiResponse(404));
+            } 
+            
             if (!string.IsNullOrEmpty(product.PictureUrl))
             {
                 product.PictureUrl = _config["ApiUrl"] + product.PictureUrl;
             }
-            if (product != null) {
-                var p = _mapper.Map<ProductViewModel, ProductToReturnDto>(product)
-                    ;
-                //var p = new ProductToReturnDto
-                //{
-                //    Id = product.Id,
-                //    Name = product.Name,
-                //    Description = product.Description,
-                //    PictureUrl = product.PictureUrl,
-                //    Price = product.Price,
-                //    ProductBrand = product.ProductBrand,
-                //    ProductType = product.ProductType
 
-                //};
-                return Ok(p);
-            }
-            else
-            {
-                return NotFound("Id "+ id + " was not found");
-            }
+
+            var p = _mapper.Map<ProductViewModel, ProductToReturnDto>(product)
+                ;
+            //var p = new ProductToReturnDto
+            //{
+            //    Id = product.Id,
+            //    Name = product.Name,
+            //    Description = product.Description,
+            //    PictureUrl = product.PictureUrl,
+            //    Price = product.Price,
+            //    ProductBrand = product.ProductBrand,
+            //    ProductType = product.ProductType
+
+            //};
+            return Ok(p);
         }
 
         [HttpGet("Brands")]
