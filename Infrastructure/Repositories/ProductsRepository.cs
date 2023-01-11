@@ -17,7 +17,7 @@ namespace Infastructure.Repositories
 {
     public interface IProductsRepository
     {
-        Task<IEnumerable<ProductViewModel>> GetProductsAsync(CancellationToken cancellationToken);
+        Task<IEnumerable<ProductViewModel>> GetProductsAsync(CancellationToken cancellationToken, string sort, int? brandId, int? typeId);
         Task<ProductViewModel> GetProductByIdAsync(int Id, CancellationToken cancellationToken);
 
         Task<IEnumerable<ProductType>> GetProductTypesAsync(CancellationToken cancellationToken);
@@ -41,7 +41,8 @@ namespace Infastructure.Repositories
             connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
-        public async Task<IEnumerable<ProductViewModel>> GetProductsAsync(CancellationToken cancellationToken)
+        public async Task<IEnumerable<ProductViewModel>>
+            GetProductsAsync(CancellationToken cancellationToken, string sort, int? brandId, int? typeId)
         {
             
             using (var connection = new SqlConnection(connectionString))
@@ -54,30 +55,49 @@ namespace Infastructure.Repositories
                         $" ,[ProductBrandId], PB.Name AS ProductBrand" +
                         $" FROM [dbo].[Products] P" +
                         $" LEFT JOIN dbo.ProductBrands PB ON p.ProductBrandId = PB.Id" +
-                        $"  LEFT JOIN dbo.ProductTypes PT ON P.ProductTypeId = PT.Id",
+                        $" LEFT JOIN dbo.ProductTypes PT ON P.ProductTypeId = PT.Id " + Filters(sort, brandId, typeId),
+                        
             
             cancellationToken: cancellationToken);
 
                 var res = await connection.QueryAsync<ProductViewModel>(cmd);
-                //List<Product> products = new List<Product>();
-                //foreach (var p in res)
-                //{
-                //    products.Add(new Product
-                //    {
-                //        Id = p.Id,
-                //        Name = p.Name,
-                //        Description = p.Description,
-                //        Price = p.Price,
-                //        PictureUrl = p.PictureUrl,
-                //        ProductBrand = new ProductBrand { Id = p.ProductBrandId, Name = p.ProductBrand },
-                //        ProductType = new ProductType { Id = p.ProductTypeId, Name = p.ProductType },
-                //        ProductTypeId = p.ProductTypeId,
-                //        ProductBrandId = p.ProductBrandId
-                //    });
-                //}
-
                 return res; 
             }
+        }
+
+        private string Filters(string sort, int? brandId, int? typeId)
+        {
+            string filter = " WHERE 1 = 1 ";
+            string retVal = " ORDER BY ";
+
+            if (brandId != null)
+            {
+                filter += " AND P.ProductBrandId = " + brandId;
+            }
+            if (typeId != null)
+            {
+                filter += " AND P.ProductTypeId = " + typeId;
+            }
+            if (!string.IsNullOrEmpty(sort))
+            {
+                switch (sort)
+                {
+                    case "priceAsc":
+                        retVal += "P.Price";
+                        break;
+                    case "priceDesc":
+                        retVal += "P.Price DESC";
+                        break;
+                    case "nameDesc":
+                        retVal += "P.Name DESC";
+                        break;
+                    default:
+                        retVal += "P.Name";
+                        break;
+                }
+                return (filter + retVal); 
+            }
+            return (filter + (retVal += "P.Name"));
         }
 
         public async Task<ProductViewModel> GetProductByIdAsync(int Id, CancellationToken cancellationToken)

@@ -31,9 +31,9 @@ namespace API.Controllers
         }
         
         [HttpGet]
-        public async Task<IActionResult> GetProducts(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetProducts(CancellationToken cancellationToken, string sort , int? brandId, int? typeId)
         {
-            var products = await _repo.GetProductsAsync(cancellationToken);
+            IEnumerable<ProductViewModel> products = await _repo.GetProductsAsync(cancellationToken, sort, brandId, typeId);
             foreach (var p in products)
             {
                 if (!string.IsNullOrEmpty(p.PictureUrl))
