@@ -27,9 +27,18 @@ namespace API
 
             services.AddControllers();
 
-            services.AddApplicationServices();  
+            services.AddApplicationServices();
             //Hit har jag flyttat AddScoped<IProductRepository, ProductRepository>
             //och även services.Configure..
+
+            services.AddCors(opt =>
+           {
+               opt.AddPolicy("CorsPolicy", policy =>
+               {
+                   policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:4200");
+               });
+
+           });
 
             services.AddSwaggerDocumentation();
             
@@ -51,6 +60,8 @@ namespace API
 
             app.UseRouting();
             app.UseStaticFiles();
+
+            app.UseCors("CorsPolicy");
 
             app.UseAuthorization();
 

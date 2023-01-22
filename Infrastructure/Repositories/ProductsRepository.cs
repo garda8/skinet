@@ -17,7 +17,7 @@ namespace Infastructure.Repositories
 {
     public interface IProductsRepository
     {
-        Task<IEnumerable<ProductViewModel>> GetProductsAsync(CancellationToken cancellationToken, string sort, int? brandId, int? typeId);
+        Task<IEnumerable<ProductViewModel>> GetProductsAsync(CancellationToken cancellationToken, ProductSpecParams productParams); //string sort, int? brandId, int? typeId);
         Task<ProductViewModel> GetProductByIdAsync(int Id, CancellationToken cancellationToken);
 
         Task<IEnumerable<ProductType>> GetProductTypesAsync(CancellationToken cancellationToken);
@@ -42,20 +42,24 @@ namespace Infastructure.Repositories
         }
 
         public async Task<IEnumerable<ProductViewModel>>
-            GetProductsAsync(CancellationToken cancellationToken, string sort, int? brandId, int? typeId)
+            GetProductsAsync(CancellationToken cancellationToken, ProductSpecParams productParams) // string sort, int? brandId, int? typeId)
         {
             
             using (var connection = new SqlConnection(connectionString))
             {
                 await connection.OpenAsync();
 
+                string tmp = Filters(productParams);
+
+                
                 var cmd = new CommandDefinition(
                 commandText: 
                         $"SELECT P.[Id], P.[Name],[Description],[Price],[PictureUrl],[ProductTypeId], PT.Name AS ProductType"+
                         $" ,[ProductBrandId], PB.Name AS ProductBrand" +
                         $" FROM [dbo].[Products] P" +
                         $" LEFT JOIN dbo.ProductBrands PB ON p.ProductBrandId = PB.Id" +
-                        $" LEFT JOIN dbo.ProductTypes PT ON P.ProductTypeId = PT.Id " + Filters(sort, brandId, typeId),
+                        $" LEFT JOIN dbo.ProductTypes PT ON P.ProductTypeId = PT.Id " 
+                        + Filters(productParams),
                         
             
             cancellationToken: cancellationToken);
@@ -65,22 +69,34 @@ namespace Infastructure.Repositories
             }
         }
 
-        private string Filters(string sort, int? brandId, int? typeId)
+        private string Filters(ProductSpecParams productParams)
         {
-            string filter = " WHERE 1 = 1 ";
-            string retVal = " ORDER BY ";
+            //productParams.Sort, productParams.BrandId, productParams.TypeId
 
-            if (brandId != null)
+
+            string filter = " WHERE 1 = 1 ";
+            string search = "";
+
+            if (!string.IsNullOrEmpty(productParams.Search))
             {
-                filter += " AND P.ProductBrandId = " + brandId;
+                search = " AND P.Name LIKE '%" + productParams.Search + "%'"; 
             }
-            if (typeId != null)
+            string retVal = " ORDER BY ";
+            string offset = " OFFSET " + (productParams.PageSize * (productParams.PageIndex - 1)) +" ROWS"
+                + " FETCH NEXT " + productParams.PageSize + " ROWS ONLY";
+
+
+            if (productParams.BrandId != null)
             {
-                filter += " AND P.ProductTypeId = " + typeId;
+                filter += " AND P.ProductBrandId = " + productParams.BrandId;
             }
-            if (!string.IsNullOrEmpty(sort))
+            if (productParams.TypeId != null)
             {
-                switch (sort)
+                filter += " AND P.ProductTypeId = " + productParams.TypeId;
+            }
+            if (!string.IsNullOrEmpty(productParams.Sort))
+            {
+                switch (productParams.Sort)
                 {
                     case "priceAsc":
                         retVal += "P.Price";
@@ -95,9 +111,9 @@ namespace Infastructure.Repositories
                         retVal += "P.Name";
                         break;
                 }
-                return (filter + retVal); 
+                return (filter + search + retVal + offset); 
             }
-            return (filter + (retVal += "P.Name"));
+            return (filter + search + (retVal += "P.Name" + offset));
         }
 
         public async Task<ProductViewModel> GetProductByIdAsync(int Id, CancellationToken cancellationToken)
