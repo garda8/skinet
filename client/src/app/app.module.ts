@@ -4,10 +4,12 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { NavBarComponent } from './nav-bar/nav-bar.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    NavBarComponent
   ],
   imports: [
     BrowserModule,
@@ -15,6 +17,6 @@ import { AppComponent } from './app.component';
     BrowserAnimationsModule
   ],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent, NavBarComponent]
 })
 export class AppModule { }
