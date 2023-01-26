@@ -17,6 +17,6 @@ import { NavBarComponent } from './nav-bar/nav-bar.component';
     BrowserAnimationsModule
   ],
   providers: [],
-  bootstrap: [AppComponent, NavBarComponent]
+  bootstrap: [AppComponent]
 })
 export class AppModule { }
