@@ -12,6 +12,7 @@ using Core.Entities;
 using Microsoft.Extensions.Configuration;
 using API.Errors;
 using Microsoft.AspNetCore.Http;
+using API.Helpers;
 
 namespace API.Controllers
 {
@@ -50,19 +51,22 @@ namespace API.Controllers
                     p.PictureUrl = _config["ApiUrl"] + p.PictureUrl;
                 }
             }
-            return Ok(_mapper.Map<IEnumerable<ProductViewModel>, IEnumerable<ProductToReturnDto>>(products));
-            //var p = products.Select(product => new ProductToReturnDto
-            //{
-            //    Id = product.Id,
-            //    Name = product.Name,
-            //    Description = product.Description,
-            //    PictureUrl = product.PictureUrl,
-            //    Price = product.Price,
-            //    ProductBrand = product.ProductBrand,
-            //    ProductType = product.ProductType
+            var data = _mapper.Map<IEnumerable<ProductViewModel>, IEnumerable<ProductToReturnDto>>(products);
+            var pageIndex = productParams.PageIndex;
+            var pageSize = productParams.PageSize;
+            productParams.PageSize = 1000000;
+            productParams.PageIndex = 1;
 
-            //});
-            //return Ok(p);
+            var items = await _repo.GetProductsAsync(cancellationToken, productParams);
+            var totCount = items.ToList().Count;
+            //Pagination<ProductToReturnDto> pagination = new Pagination();
+
+            return Ok(new Pagination<ProductToReturnDto>() { 
+                PageSize = pageSize, 
+                Count = totCount, 
+                PageIndex = pageIndex, 
+                Data = (IReadOnlyList<ProductToReturnDto>)data }); ;
+            
         }
 
         [HttpGet ("{id}")]

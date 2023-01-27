@@ -12,9 +12,12 @@ export class AppComponent implements OnInit{
 
   constructor(private http: HttpClient){}
 
+  products : any[];
+
   ngOnInit(): void{
     this.http.get('https://localhost:5001/api/products').subscribe(
       (response: any) => {
+        this.products = response.data;
         console.log(response)
 
       }
