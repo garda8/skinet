@@ -10,7 +10,7 @@ namespace Core.Entities
         private const int MaxPageSize = 50;
         public int PageIndex { get; set; } = 1;
 
-        public int PageSize  { get; set; } = 4;
+        public int PageSize  { get; set; } = 6;
 
         
         //public int PageSize { get => _pageSize; 
