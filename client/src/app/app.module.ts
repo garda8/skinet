@@ -19,7 +19,7 @@ import { HomeModule } from './home/home.module';
     BrowserAnimationsModule,
     HttpClientModule,
     CoreModule,
-    ShopModule,
+    //ShopModule,
     HomeModule
   ],
   providers: [],
